@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>axios-cancel</title>
+  <script src="http://cdn.bootcss.com/axios/0.19.0/axios.js"></script>
+</head>
+
+<body>
+  <button onclick='getProducts1()'>获取商品列表1</button><br>
+  <button onclick='getProducts2()'>获取商品列表2</button><br>
+  <button onclick='cancelReq()'>取消请求</button><br>
+  <script>
+    const CancelToken = axios.CancelToken;
+    let cancel;
+
+    axios.interceptors.request.use(config => {
+      if (typeof cancel === 'function') {
+        cancel('终止请求');
+      }
+      config.cancelToken = new CancelToken(function executor(c) {
+        cancel = c;
+      });
+      return config;
+    });
+
+    axios.interceptors.response.use(response => {
+      cancel = null;
+      return response;
+    }, error => {
+      if (axios.isCancel(error)) {
+        console.log(error.message);
+        return new Promise(() => {});
+      } else {
+        cancel = null;
+        return Promise.reject(error);
+      }
+    });
+
+    function getProducts1() {
+      axios({
+        url: 'http://localhost:4000/products1'
+      }).then(response => {
+        console.log('product1 success', response.data);
+      }).catch(error => {
+        console.log('products1 Request error', error.message);
+      });
+    }
+
+    function getProducts2() {
+      axios({
+        url: 'http://localhost:4000/products2'
+      }).then(response => {
+        console.log('product2 success', response.data);
+      }).catch(error => {
+        console.log('products2 Request error', error.message);
+      });
+    }
+
+    function cancelReq() {
+      cancel && cancel('Operation canceled by the user.')
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>axios-create</title>
+  <script src="http://cdn.bootcss.com/axios/0.19.0/axios.js"></script>
+</head>
+
+<body>
+  <button>获取商品列表1</button>
+  <button>获取商品列表2</button>
+  <button>取消请求</button>
+  <script>
+    axios.defaults.baseURL = 'http://localhost:4000';
+
+    const instance = axios.create({
+      baseURL: 'http://localhost:3000'
+    });
+
+    instance.interceptors.request.use(config => {
+      console.log('request interceptor1');
+      return config;
+    });
+
+    instance.interceptors.request.use(config => {
+      console.log('request interceptor2');
+      return config;
+    });
+
+    instance.interceptors.response.use(response => {
+      console.log('response interceptor1');
+      return response;
+    });
+
+    instance.interceptors.response.use(response => {
+      console.log('response interceptor2');
+      return response;
+    });
+
+    instance({
+      method: 'GET',
+      url: '/posts',
+      params: {
+        id: 2
+      }
+    }).then(response => {
+      console.log(response.data);
+    }, error => {
+      console.log(error.message);
+    });
+  </script>
+</body>
+
+</html>
